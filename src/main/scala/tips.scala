@@ -29,7 +29,7 @@ object tips {
     val sqliteUtils = new sqliteUtils
 
     val route: Route =
-      pathPrefix("getUser") {
+      pathPrefix("getSumDonationByUser") {
         get {
           val req = sqliteUtils.query(url, "SELECT id_user, SUM(donation) as sum_donation FROM tips GROUP BY id_user;", Seq("id_user","sum_donation"))
           req match {
