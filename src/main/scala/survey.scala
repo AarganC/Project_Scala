@@ -32,17 +32,17 @@ object survey {
   implicit val surveysFormat = jsonFormat1(Surveys)
 
   case class SurveyAnswer(id_survey_answer: Int, id_user: Int, response: Int, id_survey: Int)
-  case class SurveyAnswers(vec: Vector[Survey])
+  case class SurveyAnswers(vec: Vector[SurveyAnswer])
   implicit val surveyAnswerFormat = jsonFormat4(SurveyAnswer)
   implicit val surveyAnswersFormat = jsonFormat1(SurveyAnswers)
 
   case class ResponseAnswer(survey: String, answer1: String, answer2: String, response: Int)
-  case class ResponseAnswers(vec: Vector[Survey])
+  case class ResponseAnswers(vec: Vector[ResponseAnswer])
   implicit val responseAnswerFormat = jsonFormat4(ResponseAnswer)
   implicit val responseAnswersFormat = jsonFormat1(ResponseAnswers)
 
   case class ResponseSpeAnswer(survey: String, answer1: String, answer2: String, response: Int, id_survey: Int)
-  case class ResponseSpeAnswers(vec: Vector[Survey])
+  case class ResponseSpeAnswers(vec: Vector[ResponseSpeAnswer])
   implicit val responseSpeAnswerFormat = jsonFormat5(ResponseSpeAnswer)
   implicit val responseSpeAnswersFormat = jsonFormat1(ResponseSpeAnswers)
 
