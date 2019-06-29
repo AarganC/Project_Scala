@@ -46,7 +46,7 @@ object survey {
   implicit val responseSpeAnswerFormat = jsonFormat5(ResponseSpeAnswer)
   implicit val responseSpeAnswersFormat = jsonFormat1(ResponseSpeAnswers)
 
-  val url = "jdbc:sqlite:/Users/aargancointepas/Documents/ESGI-4IBD/ProgrammationFonctionnel/Project_Scala/db/project_scala.db"
+  val url = "jdbc:sqlite:./db/project_scala.db"
   val sqliteUtils = new sqliteUtils
 
   val route_startDb: Route =
