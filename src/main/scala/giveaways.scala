@@ -11,15 +11,11 @@ import spray.json.JsValue
 import utils.sqliteUtils
 import utils.FromMap.to
 import utils.database
+import scala.util.Random
 
 import scala.io.StdIn
 
 object giveaway {
-  // needed to run the route
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
-  // needed for the future map/flatmap in the end and future in fetchItem and saveOrder
-  implicit val executionContext = system.dispatcher
 
   case class User(id_user: Int, name_user: String, status_blacklist: Int, status_sub: Int)
   case class Users(vec: Vector[User])
@@ -45,21 +41,12 @@ object giveaway {
   val url = "jdbc:sqlite:./db/project_scala.db"
   val sqliteUtils = new sqliteUtils
 
-  val route_startDb: Route =
-    pathPrefix("startDB") {
-      get{
-        val startDb = new database
-        startDb.start_db()
-        complete("Database is ready")
-      }
-    }
-
   val route_addGiveaway: Route =
     pathPrefix("addGiveaway") {
       post{
         entity(as[JsValue]) { json =>
           val giveaway = json.asJsObject.fields("giveaway").convertTo[String]
-          val id_user = json.asJsObject.fields("id_user").convertTo[Int]
+          val id_user = json.asJsObject.fields("id_user").convertTo[String]
           println("giveaway = " + giveaway)
 
           val query_ct = "SELECT * FROM giveaway;"
@@ -95,8 +82,8 @@ object giveaway {
     pathPrefix("subscribeGiveaway") {
       post{
         entity(as[JsValue]) { json =>
-          val id_user = json.asJsObject.fields("id_user").convertTo[Int]
-          val id_giveaway = json.asJsObject.fields("id_giveaway").convertTo[Int]
+          val id_user = json.asJsObject.fields("id_user").convertTo[String]
+          val id_giveaway = json.asJsObject.fields("id_giveaway").convertTo[String]
 
           val query_ct = "SELECT * FROM giveaway_user"
           //println("query_ct = " + query_ct)
@@ -141,28 +128,29 @@ object giveaway {
           val req = sqliteUtils.query(url, query, Seq("id_user", "status_blacklist", "donation", "id_giveaway"))
           println("req = " + req)
 
+          val output = Seq()
+
           req match {
-            case Some(r) => val values1 = r.flatMap(v => to[ResponseDrawGiveaway].from(v))
+            case Some(r) => val values = r.flatMap(v => to[ResponseDrawGiveaway].from(v))
               .filter(x => x.status_blacklist == 0 && x.id_giveaway == id_giveaway.toInt)
-              .groupBy(x => x.id_user)
-              .mapValues(_.map(_.donation.toString.toInt).sum).map(x => (x._1, x._2)).toSeq
-              println("values1 = " + values1)
-              complete(values1)
+              .map(_.id_user)
+              /*.groupBy(_.id_user).mapValues(t=>(t.map(_.donation).sum))
+              .map(x => (x._1, x._2 match {
+                case y if 0 until 100 contains y => output :+ Seq(x._1.toString, 0.2)
+                case y if 100 until 500 contains y => output :+ Seq(x._1.toString, 0.4)
+                case y if 500 until 1000 contains y => output :+ Seq(x._1.toString, 0.6)
+                case y if 1000 until 1000000 contains y => output :+ Seq(x._1.toString, 0.8)
+                case _ => println("Error attribution weighted; sum_donation = " + x._2.toString)
+              }))*/
+              val random = new Random
+              val reply = values(
+                random.nextInt(values.length)
+              )
+              println("values = " + reply)
+              complete(reply.toString)
             case None => complete("mauvaise table")
           }
         }
       }
     }
-
-
-
-  def main(args: Array[String]) {
-    val combineRoute =  route_giveawayDraw ~ route_subscribeGiveaway ~ route_addGiveaway ~ route_startDb
-    val bindingFuture = Http().bindAndHandle(combineRoute, "localhost", 8080)
-    println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
-    StdIn.readLine() // let it run until user presses return
-    bindingFuture
-      .flatMap(_.unbind()) // trigger unbinding from the port
-      .onComplete(_ ⇒ system.terminate()) // and shutdown when done
-  }
 }

@@ -15,11 +15,6 @@ import utils.database
 import scala.io.StdIn
 
 object survey {
-  // needed to run the route
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
-  // needed for the future map/flatmap in the end and future in fetchItem and saveOrder
-  implicit val executionContext = system.dispatcher
 
   case class User(id_user: Int, name_user: String, status_blacklist: Int, status_sub: Int)
   case class Users(vec: Vector[User])
@@ -173,14 +168,4 @@ object survey {
         }
       }
     }
-
-  def main(args: Array[String]) {
-    val combineRoute = route_addSurvey ~ route_addAnswer ~ route_getResume ~ route_getSpeResume ~ route_startDb
-    val bindingFuture = Http().bindAndHandle(combineRoute, "localhost", 8080)
-    println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
-    StdIn.readLine() // let it run until user presses return
-    bindingFuture
-      .flatMap(_.unbind()) // trigger unbinding from the port
-      .onComplete(_ ⇒ system.terminate()) // and shutdown when done
-  }
 }

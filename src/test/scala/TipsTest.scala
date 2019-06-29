@@ -8,18 +8,18 @@ import akka.util.ByteString
 class TipsTest extends WordSpec with Matchers with ScalatestRouteTest {
   "The service" should {
     "return all users" in {
-      Get("/getAllUser") ~> tips.route_startDb ~> check {
-        responseAs[String] shouldEqual "Completed"
+      Get("/getAllUser") ~> tips.route ~> check {
+        status.isSuccess() shouldEqual true
       }
     }
     "return all subs" in {
-      Get("/getAllSubs") ~> tips.route_startDb ~> check {
-        responseAs[String] shouldEqual "Completed"
+      Get("/getAllSubs") ~> tips.route ~> check {
+        status.isSuccess() shouldEqual true
       }
     }
     "return sum donation" in {
-      Get("/getSumDonationUser") ~> tips.route_startDb ~> check {
-        responseAs[String] shouldEqual "Completed"
+      Get("/getSumDonationUser") ~> tips.route ~> check {
+        status.isSuccess() shouldEqual true
       }
     }
 
@@ -28,7 +28,7 @@ class TipsTest extends WordSpec with Matchers with ScalatestRouteTest {
       s"""
          |{
          |    "id_user": "3",
-         |    "somme": "55",
+         |    "somme": "55"
          |
          |}
         """.stripMargin)
@@ -37,7 +37,7 @@ class TipsTest extends WordSpec with Matchers with ScalatestRouteTest {
       uri = "/AddTips",
       entity = HttpEntity(MediaTypes.`application/json`, jsonRequestAddTips))
     "return true if addtips is OK" in {
-      postRequest ~> tips.route~> check {
+      postRequest ~> tips.route ~> check {
         status.isSuccess() shouldEqual true
       }
     }
